@@ -1,0 +1,159 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: User serverless microservice
+Transform:
+    - AWS::Serverless-2016-10-31
+
+Parameters:
+    SuperAdminEmail:
+        Type: String
+        Description: The email address of the default user to be added to the Cognito user pool by default
+    AuthDomainName:
+        Type: String
+        Description: Prefix for the domain name Cognito uses for its UI (must be unique in the entire AWS)
+
+Globals:
+    Function:
+        Layers:
+            - !Ref RuntimeDependenciesLayer
+        Environment:
+            Variables:
+                SUPER_ADMIN_EMAIL: !Ref SuperAdminEmail
+        Runtime: nodejs14.x
+        MemorySize: 128
+        Timeout: 100
+    Api:
+        Auth:
+            Authorizers:
+                MsUserCognitoAuthorizer:
+                    UserPoolArn: !GetAtt MsUserCognitoUserPool.Arn
+                    AuthType: COGNITO_USER_POOLS
+            DefaultAuthorizer: MsUserCognitoAuthorizer
+        Cors:
+            AllowMethods: "'GET,OPTIONS'"
+            AllowHeaders: "'content-type'"
+            AllowOrigin: "'*'"
+            AllowCredentials: "'*'"
+
+Resources:
+    MsUserAPIFunction:
+        Type: AWS::Serverless::Function
+        Metadata:
+            BuildMethod: makefile
+        Properties:
+            Handler: dist/handlers/user.handler
+            Description: User serverless microservice
+            Runtime: nodejs14.x
+            Environment:
+                Variables:
+                    DYNAMODB_URI: ''
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref DynamoDBUsersTable
+                - Statement:
+                      - Effect: Allow
+                        Resource: '*'
+                        Action:
+                            - events:PutEvents
+            Events:
+                Healthcheck:
+                    Type: Api
+                    Properties:
+                        Path: /healthcheck
+                        Auth:
+                            Authorizer: NONE
+                        Method: get
+
+    # Shared layer with Lambda runtime dependencies
+    RuntimeDependenciesLayer:
+        Type: AWS::Serverless::LayerVersion
+        Metadata:
+            BuildMethod: makefile
+        Properties:
+            LayerName: 'ms-user-dependencies'
+            Description: Runtime dependencies for Lambdas
+            ContentUri: ./
+            CompatibleRuntimes:
+                - nodejs14.x
+            RetentionPolicy: Retain
+
+    MsUserCognitoUserPool:
+        Type: AWS::Cognito::UserPool
+        Properties:
+            # We kept the same User Pool Name to use the same authentication for auth and user MS
+            UserPoolName: MsAuth
+            Policies:
+                PasswordPolicy:
+                    MinimumLength: 8
+            UsernameAttributes:
+                - email
+            Schema:
+                - AttributeDataType: String
+                  Name: email
+                  Required: true
+
+    MyCognitoUserPoolClient:
+        Type: AWS::Cognito::UserPoolClient
+        Properties:
+            UserPoolId: !Ref MsUserCognitoUserPool
+            ClientName: MsAuthClient
+            GenerateSecret: false
+            # You can edit this in the future to match your desired callback URL
+            CallbackURLs:
+                - https://soffredi.org
+            AllowedOAuthFlowsUserPoolClient: true
+            AllowedOAuthFlows:
+                - code
+                - implicit
+            AllowedOAuthScopes:
+                - email
+                - openid
+                - profile
+                - aws.cognito.signin.user.admin
+            SupportedIdentityProviders:
+                - COGNITO
+    AuthDomain:
+        Type: AWS::Cognito::UserPoolDomain
+        Properties:
+            UserPoolId: !Ref MsUserCognitoUserPool
+            Domain: !Ref AuthDomainName
+
+    TestUser:
+        Type: AWS::Cognito::UserPoolUser
+        Properties:
+            UserPoolId: !Ref MsUserCognitoUserPool
+            Username: !Ref SuperAdminEmail
+            UserAttributes:
+                - Name: email
+                  Value: !Ref SuperAdminEmail
+
+    DynamoDBUsersTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            BillingMode: PAY_PER_REQUEST
+            TableName: ms-user
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
+    EventBus:
+        Type: AWS::Events::EventBus
+        Properties:
+            # Keeping same event-bus name to share with both auth and user MS
+            Name: 'ms-auth'
+
+Outputs:
+    MsUserAPIProd:
+        Description: 'API Gateway endpoint URL for Prod environment'
+        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
+    MsUserAPIStage:
+        Description: 'API Gateway endpoint URL for Stage environment'
+        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage'
+    MsUserAPIFunction:
+        Description: 'User API Lambda Function ARN'
+        Value: !GetAtt MsUserAPIFunction.Arn
+    MsUserAPIFunctionIamRole:
+        Description: 'Implicit IAM Role created for User API function'
+        Value: !GetAtt MsUserAPIFunctionRole.Arn
