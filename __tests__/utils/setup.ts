@@ -1,7 +1,7 @@
 import dynamoose from 'dynamoose';
 import { clearAllTables } from './dynamodb-utils';
 
-jest.mock('../../src/events/event-publisher');
+// jest.mock('../../src/events/event-publisher');
 
 /**
  * jest won't work in watchAll mode because of a known BUG.

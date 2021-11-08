@@ -7,9 +7,6 @@ Parameters:
     SuperAdminEmail:
         Type: String
         Description: The email address of the default user to be added to the Cognito user pool by default
-    AuthDomainName:
-        Type: String
-        Description: Prefix for the domain name Cognito uses for its UI (must be unique in the entire AWS)
 
 Globals:
     Function:
@@ -25,7 +22,7 @@ Globals:
         Auth:
             Authorizers:
                 MsUserCognitoAuthorizer:
-                    UserPoolArn: !GetAtt MsUserCognitoUserPool.Arn
+                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_iJ9JLuMp7
                     AuthType: COGNITO_USER_POOLS
             DefaultAuthorizer: MsUserCognitoAuthorizer
         Cors:
@@ -76,56 +73,6 @@ Resources:
                 - nodejs14.x
             RetentionPolicy: Retain
 
-    MsUserCognitoUserPool:
-        Type: AWS::Cognito::UserPool
-        Properties:
-            # We kept the same User Pool Name to use the same authentication for auth and user MS
-            UserPoolName: MsAuth
-            Policies:
-                PasswordPolicy:
-                    MinimumLength: 8
-            UsernameAttributes:
-                - email
-            Schema:
-                - AttributeDataType: String
-                  Name: email
-                  Required: true
-
-    MyCognitoUserPoolClient:
-        Type: AWS::Cognito::UserPoolClient
-        Properties:
-            UserPoolId: !Ref MsUserCognitoUserPool
-            ClientName: MsAuthClient
-            GenerateSecret: false
-            # You can edit this in the future to match your desired callback URL
-            CallbackURLs:
-                - https://soffredi.org
-            AllowedOAuthFlowsUserPoolClient: true
-            AllowedOAuthFlows:
-                - code
-                - implicit
-            AllowedOAuthScopes:
-                - email
-                - openid
-                - profile
-                - aws.cognito.signin.user.admin
-            SupportedIdentityProviders:
-                - COGNITO
-    AuthDomain:
-        Type: AWS::Cognito::UserPoolDomain
-        Properties:
-            UserPoolId: !Ref MsUserCognitoUserPool
-            Domain: !Ref AuthDomainName
-
-    TestUser:
-        Type: AWS::Cognito::UserPoolUser
-        Properties:
-            UserPoolId: !Ref MsUserCognitoUserPool
-            Username: !Ref SuperAdminEmail
-            UserAttributes:
-                - Name: email
-                  Value: !Ref SuperAdminEmail
-
     DynamoDBUsersTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -137,12 +84,6 @@ Resources:
             KeySchema:
                 - AttributeName: id
                   KeyType: HASH
-
-    EventBus:
-        Type: AWS::Events::EventBus
-        Properties:
-            # Keeping same event-bus name to share with both auth and user MS
-            Name: 'ms-auth'
 
 Outputs:
     MsUserAPIProd:
