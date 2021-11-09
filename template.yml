@@ -59,6 +59,14 @@ Resources:
                         Auth:
                             Authorizer: NONE
                         Method: get
+                # Users endpoints
+                UsersV0Get:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users
+                        Auth:
+                            Authorizer: NONE
+                        Method: get
 
     # Shared layer with Lambda runtime dependencies
     RuntimeDependenciesLayer:
