@@ -1,7 +1,6 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import dynamoose from 'dynamoose';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { exit } from 'process';
-import { apiCallsRouter } from './api-calls-router';
 import { ResponseBody } from './types';
 
 if (process.env.AWS_SAM_LOCAL) {
@@ -12,6 +11,8 @@ if (process.env.AWS_SAM_LOCAL) {
         exit(1);
     }
 }
+
+import { apiCallsRouter } from './api-calls-router';
 
 export const handler = async (
     event?: APIGatewayProxyEvent,

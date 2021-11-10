@@ -5,6 +5,7 @@ import { BadMethodError } from '../errors/bad-method-error';
 import { BadRequestError } from '../errors/bad-request-error';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { getUsersHandler } from '../route-handlers/getUsers';
+import { postUserHandler } from '../route-handlers/postUser';
 
 export const apiCallsRouter = async (
     event: APIGatewayProxyEvent,
@@ -19,11 +20,9 @@ export const apiCallsRouter = async (
                     case 'GET':
                         body = await getUsersHandler(event);
                         break;
-                    // case 'POST':
-                    //     body = await routeAuthorizer(event, postUserHandler, [
-                    //         auth.Users.AddUser,
-                    //     ]);
-                    //     break;
+                    case 'POST':
+                        body = await postUserHandler(event);
+                        break;
                     default:
                         throw new BadMethodError();
                 }

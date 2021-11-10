@@ -37,7 +37,7 @@ Resources:
         Metadata:
             BuildMethod: makefile
         Properties:
-            Handler: dist/handlers/user.handler
+            Handler: dist/handlers/user-ms-handler.handler
             Description: User serverless microservice
             Runtime: nodejs14.x
             Environment:
@@ -67,6 +67,11 @@ Resources:
                         Auth:
                             Authorizer: NONE
                         Method: get
+                UsersV0Post:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users
+                        Method: post
 
     # Shared layer with Lambda runtime dependencies
     RuntimeDependenciesLayer:
