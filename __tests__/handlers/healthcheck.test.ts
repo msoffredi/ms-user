@@ -1,5 +1,5 @@
 import { constructAPIGwEvent } from '../utils/helpers';
-import { handler } from '../../src/handlers/user';
+import { handler } from '../../src/handlers/user-ms-handler';
 import { ServiceStatus } from '../../src/handlers/types';
 
 // This includes all tests for auth.handler()
