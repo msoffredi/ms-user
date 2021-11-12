@@ -50,3 +50,48 @@ it('throws an error if calling POST without proper data', async () => {
     const postResult = await handler(event);
     expect(postResult.statusCode).toEqual(400);
 });
+
+it('should return a 200 and a user on GET with id', async () => {
+    const user = await addUser();
+
+    const getEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{email}',
+            pathParameters: { email: user.email },
+        },
+    );
+    const result = await handler(getEvent);
+
+    expect(result.statusCode).toEqual(200);
+    expect(JSON.parse(result.body)).toMatchObject({
+        email: user.email,
+        id: user.id,
+    });
+});
+
+it('throws a 422 error if the id provided to retrieve a user is not found', async () => {
+    const getEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{email}',
+            pathParameters: { email: 'wrong-id' },
+        },
+    );
+    const getResult = await handler(getEvent);
+    expect(getResult.statusCode).toEqual(422);
+});
+
+it('throws an error if we do not provide a user id on get', async () => {
+    const deleteEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{email}',
+        },
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(400);
+});

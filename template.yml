@@ -71,7 +71,23 @@ Resources:
                     Type: Api
                     Properties:
                         Path: /v0/users
+                        Auth:
+                            Authorizer: NONE
                         Method: post
+                UsersV0Delete:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users/{email}
+                        Auth:
+                            Authorizer: NONE
+                        Method: delete
+                UsersV0GetOne:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users/{email}
+                        Auth:
+                            Authorizer: NONE
+                        Method: get
 
     # Shared layer with Lambda runtime dependencies
     RuntimeDependenciesLayer:

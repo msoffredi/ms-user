@@ -5,6 +5,7 @@ import { BadMethodError } from '../errors/bad-method-error';
 import { BadRequestError } from '../errors/bad-request-error';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { getUsersHandler } from '../route-handlers/getUsers';
+import { getOneUserHandler } from '../route-handlers/getOneUser';
 import { postUserHandler } from '../route-handlers/postUser';
 
 export const apiCallsRouter = async (
@@ -15,6 +16,21 @@ export const apiCallsRouter = async (
 
     try {
         switch (event.resource) {
+            case '/v0/users/{email}':
+                switch (event.httpMethod) {
+                    case 'GET':
+                        body = await getOneUserHandler(event);
+                        break;
+                    // case 'DELETE':
+                    //     body = await routeAuthorizer(event, delUserHandler, [
+                    //         auth.Users.DeleteUser,
+                    //     ]);
+                    //     break;
+                    default:
+                        throw new BadMethodError();
+                }
+                break;
+
             case '/v0/users':
                 switch (event.httpMethod) {
                     case 'GET':
