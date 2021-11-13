@@ -77,7 +77,7 @@ it('throws a 422 error if the id provided to retrieve a user is not found', asyn
         {
             method: 'GET',
             resource: '/v0/users/{email}',
-            pathParameters: { email: 'wrong-id' },
+            pathParameters: { email: 'wrong-email' },
         },
     );
     const getResult = await handler(getEvent);
@@ -94,4 +94,57 @@ it('throws an error if we do not provide a user id on get', async () => {
     );
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(400);
+});
+
+it('deletes a user when calling endpoint with id and DELETE method', async () => {
+    const user = await addUser();
+
+    const result = await User.get(user.email);
+    expect(result).toBeDefined();
+
+    const deleteEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'DELETE',
+            resource: '/v0/users/{email}',
+            pathParameters: { email: user.email },
+        },
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(200);
+
+    const result2 = await User.get(user.email);
+    expect(result2).toBeUndefined();
+
+    // expect(publisher).toHaveBeenCalledWith(
+    //     AuthEventDetailTypes.AuthUserDeleted,
+    //     {
+    //         userId: user.id,
+    //     },
+    // );
+});
+
+it('throws an error if we do not provide an user id on delete', async () => {
+    const deleteEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'DELETE',
+            resource: '/v0/users/{email}',
+        },
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(400);
+});
+
+it('throws a 422 error if the id provided to delete a user is not found', async () => {
+    const deleteEvent = constructAPIGwEvent(
+        {},
+        {
+            method: 'DELETE',
+            resource: '/v0/users/{email}',
+            pathParameters: { email: 'wrong-email' },
+        },
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(422);
 });

@@ -7,6 +7,7 @@ import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { getUsersHandler } from '../route-handlers/getUsers';
 import { getOneUserHandler } from '../route-handlers/getOneUser';
 import { postUserHandler } from '../route-handlers/postUser';
+import { delUserHandler } from '../route-handlers/delUser';
 
 export const apiCallsRouter = async (
     event: APIGatewayProxyEvent,
@@ -21,11 +22,9 @@ export const apiCallsRouter = async (
                     case 'GET':
                         body = await getOneUserHandler(event);
                         break;
-                    // case 'DELETE':
-                    //     body = await routeAuthorizer(event, delUserHandler, [
-                    //         auth.Users.DeleteUser,
-                    //     ]);
-                    //     break;
+                    case 'DELETE':
+                        body = await delUserHandler(event);
+                        break;
                     default:
                         throw new BadMethodError();
                 }
