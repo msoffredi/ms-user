@@ -22,7 +22,7 @@ Globals:
         Auth:
             Authorizers:
                 MsUserCognitoAuthorizer:
-                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_iJ9JLuMp7
+                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_SvqHNsy6V
                     AuthType: COGNITO_USER_POOLS
             DefaultAuthorizer: MsUserCognitoAuthorizer
         Cors:
@@ -37,7 +37,7 @@ Resources:
         Metadata:
             BuildMethod: makefile
         Properties:
-            Handler: dist/handlers/user.handler
+            Handler: dist/handlers/user-api.handler
             Description: User serverless microservice
             Runtime: nodejs14.x
             Environment:
@@ -56,6 +56,35 @@ Resources:
                     Type: Api
                     Properties:
                         Path: /healthcheck
+                        Auth:
+                            Authorizer: NONE
+                        Method: get
+                # Users endpoints
+                UsersV0Get:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users
+                        Auth:
+                            Authorizer: NONE
+                        Method: get
+                UsersV0Post:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users
+                        Auth:
+                            Authorizer: NONE
+                        Method: post
+                UsersV0Delete:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users/{email}
+                        Auth:
+                            Authorizer: NONE
+                        Method: delete
+                UsersV0GetOne:
+                    Type: Api
+                    Properties:
+                        Path: /v0/users/{email}
                         Auth:
                             Authorizer: NONE
                         Method: get

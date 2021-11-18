@@ -51,7 +51,9 @@ The service can be tested locally to some degree although for development purpos
 
 In order for the service to start locally t
 
-Configure your local DynamoDB access by copying the file `env.json.sample` into a new file named `env.json` and edit the file to make the DynamoDB URI match your local Docker network accessible IP address. In my Mac laptop that was `http://192.168.0.151:8000` and the port has to stay at `8000` (unless you have a conflict which will require more work to get it adjusted).
+Configure your local DynamoDB access by copying the file `env.json.sample` into a new file named `env.json` and edit the file to make the DynamoDB URI match your local Docker network accessible IP address. In my Mac laptop that was `http://192.168.0.x:8000` and the port has to stay at `8000` (unless you have a conflict which will require more work to get it adjusted).
+
+**Note: Be sure you double check this every time you restart your computer and/or your internet get restarted since the IP address may change with every retart.**
 
 Remove any existing `.aws-sam` directory in the project root (and any content inside). This directory is ignored but gets created when you try to build the project for an AWS deploy. Trying to run the project locally with an existing directory (and content) may end up in conflicts and/or problems in the future if you are testing changes since AWS will try to run the local copy out of the build and not out of your source code.
 

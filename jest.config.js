@@ -12,4 +12,5 @@ module.exports = {
     globalTeardown: './node_modules/@shelf/jest-dynamodb/teardown.js',
     testEnvironment: './node_modules/@shelf/jest-dynamodb/environment.js',
     setupFilesAfterEnv: ['./__tests__/utils/setup.ts'],
+    collectCoverageFrom: ['src/**/*.{ts,js}'],
 };

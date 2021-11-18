@@ -1,6 +1,6 @@
 import { constructAPIGwEvent } from '../utils/helpers';
-import { handler } from '../../src/handlers/user';
-import { ServiceStatus } from '../../src/handlers/types';
+import { handler } from '../../src/handlers/user-api';
+import { ServiceStatus } from '@jmsoffredi/ms-common';
 
 // This includes all tests for auth.handler()
 it('should return a 200 and a valid status as healthy on GET over healthcheck endpoint', async () => {

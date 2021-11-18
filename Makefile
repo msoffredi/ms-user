@@ -2,7 +2,7 @@
 .PHONY: build-MsUserAPIFunction
 
 build-MsUserAPIFunction:
-	$(MAKE) HANDLER=src/handlers/user.ts build-lambda-common
+	$(MAKE) HANDLER=src/handlers/user-api.ts build-lambda-common
 
 build-lambda-common:
 	npm install
