@@ -22,7 +22,7 @@ Globals:
         Auth:
             Authorizers:
                 MsUserCognitoAuthorizer:
-                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_iJ9JLuMp7
+                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_SvqHNsy6V
                     AuthType: COGNITO_USER_POOLS
             DefaultAuthorizer: MsUserCognitoAuthorizer
         Cors:
