@@ -1,17 +1,32 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
-import { ResponseBody, HandlerResponse } from './types';
-import { CustomError } from '../errors/custom-error';
-import { BadMethodError } from '../errors/bad-method-error';
-import { BadRequestError } from '../errors/bad-request-error';
-import { healthcheckHandler } from '../route-handlers/healthcheck';
-import { getUsersHandler } from '../route-handlers/getUsers';
+import dynamoose from 'dynamoose';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { exit } from 'process';
+import {
+    BadMethodError,
+    BadRequestError,
+    CustomError,
+    ResponseBody,
+} from '@jmsoffredi/ms-common';
 import { getOneUserHandler } from '../route-handlers/getOneUser';
-import { postUserHandler } from '../route-handlers/postUser';
 import { delUserHandler } from '../route-handlers/delUser';
+import { getUsersHandler } from '../route-handlers/getUsers';
+import { postUserHandler } from '../route-handlers/postUser';
+import { healthcheckHandler } from '../route-handlers/healthcheck';
 
-export const apiCallsRouter = async (
+if (process.env.AWS_SAM_LOCAL) {
+    if (process.env.DYNAMODB_URI) {
+        dynamoose.aws.ddb.local(process.env.DYNAMODB_URI);
+    } else {
+        console.error('No local DynamoDB URL provided');
+        exit(1);
+    }
+}
+
+export const handler = async (
     event: APIGatewayProxyEvent,
-): Promise<HandlerResponse> => {
+): Promise<APIGatewayProxyResult> => {
+    console.log('Received event:', event);
+
     let status = 200;
     let body: ResponseBody = null;
 
@@ -64,5 +79,8 @@ export const apiCallsRouter = async (
         }
     }
 
-    return { status, body };
+    return {
+        statusCode: status,
+        body: JSON.stringify(body),
+    };
 };

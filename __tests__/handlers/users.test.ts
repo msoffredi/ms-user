@@ -1,4 +1,4 @@
-import { handler } from '../../src/handlers/user-ms-handler';
+import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
 import { constructAPIGwEvent } from '../utils/helpers';
 

@@ -37,7 +37,7 @@ Resources:
         Metadata:
             BuildMethod: makefile
         Properties:
-            Handler: dist/handlers/user-ms-handler.handler
+            Handler: dist/handlers/user-api.handler
             Description: User serverless microservice
             Runtime: nodejs14.x
             Environment:
