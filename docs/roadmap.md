@@ -10,3 +10,4 @@
 -   API Gateway endpoint caching (with cache purge on updates)
 -   Events for local dev (can use local SAM events + invoke)
 -   Document API in an OpenAPI file (Swagger)
+-   First time initialization should be triggered automatically over deployment automation (aws lambda invoke?) and not accessible through an API endpoint

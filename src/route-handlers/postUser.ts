@@ -2,9 +2,9 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 import { randomUUID } from 'crypto';
 import {
     DatabaseError,
-    events,
     RequestValidationError,
     RouteHandler,
+    Types,
 } from '@jmsoffredi/ms-common';
 import { User, UserDoc } from '../models/user';
 import { Serializers } from '../models/_common';
@@ -45,9 +45,12 @@ export const postUserHandler: RouteHandler = async (
 
     if (newUser) {
         // Publish user.created event
-        await userPublisher(events.UserCreated.type, {
-            id: newUser.id,
-            email: newUser.email,
+        await userPublisher({
+            type: Types.UserCreated,
+            data: {
+                id: newUser.id,
+                email: newUser.email,
+            },
         });
     } else {
         throw new DatabaseError(

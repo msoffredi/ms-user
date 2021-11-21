@@ -2,7 +2,7 @@ import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
 import { constructAPIGwEvent } from '../utils/helpers';
 import { userPublisher } from '../../src/events/user-publisher';
-import { events } from '@jmsoffredi/ms-common';
+import { Types } from '@jmsoffredi/ms-common';
 
 const addUser = async (): Promise<UserDoc> => {
     return await User.create({
@@ -38,9 +38,12 @@ it('returns 200 and adds a new user on proper POST call', async () => {
     const result = await handler(postRoleEvent);
     expect(result.statusCode).toEqual(200);
     expect(JSON.parse(result.body).id).toEqual(payload.id);
-    expect(userPublisher).toHaveBeenCalledWith(events.UserCreated.type, {
-        id: payload.id,
-        email: payload.email,
+    expect(userPublisher).toHaveBeenCalledWith({
+        type: Types.UserCreated,
+        data: {
+            id: payload.id,
+            email: payload.email,
+        },
     });
 });
 
@@ -122,8 +125,11 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
     const result2 = await User.get(user.email);
     expect(result2).toBeUndefined();
 
-    expect(userPublisher).toHaveBeenCalledWith(events.UserDeleted.type, {
-        userId: user.email,
+    expect(userPublisher).toHaveBeenCalledWith({
+        type: Types.UserDeleted,
+        data: {
+            userId: user.email,
+        },
     });
 });
 

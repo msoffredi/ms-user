@@ -1,20 +1,19 @@
 import { Config } from '../config';
 import {
     eventBuses,
-    EventData,
     EventSources,
     publisher,
+    UserCreatedEventDataType,
+    UserDeletedEventDataType,
 } from '@jmsoffredi/ms-common';
 
 export const userPublisher = async (
-    type: string,
-    data: EventData,
+    data: UserCreatedEventDataType | UserDeletedEventDataType,
     detailType = '',
 ): Promise<void> => {
     await publisher(
-        type,
         data,
-        detailType || type,
+        detailType || data.type,
         Config.events.eventBusType,
         eventBuses[Config.events.eventBusType].busName,
         EventSources.Users,
