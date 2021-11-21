@@ -108,10 +108,10 @@ Resources:
             BillingMode: PAY_PER_REQUEST
             TableName: ms-user
             AttributeDefinitions:
-                - AttributeName: id
+                - AttributeName: email
                   AttributeType: S
             KeySchema:
-                - AttributeName: id
+                - AttributeName: email
                   KeyType: HASH
 
 Outputs:
