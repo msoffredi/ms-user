@@ -10,13 +10,12 @@ export const userPublisher = async (
     type: string,
     data: EventData,
     detailType = '',
-    eventBusType = Config.events.eventBusType,
 ): Promise<void> => {
     await publisher(
         type,
         data,
         detailType || type,
-        eventBusType,
+        Config.events.eventBusType,
         eventBuses[Config.events.eventBusType].busName,
         EventSources.Users,
     );
