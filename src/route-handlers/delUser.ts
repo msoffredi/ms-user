@@ -4,7 +4,7 @@ import {
     RequestValidationError,
     DeleteRecordResponseBody,
     RouteHandler,
-    events,
+    Types,
 } from '@jmsoffredi/ms-common';
 import { User } from '../models/user';
 import { userPublisher } from '../events/user-publisher';
@@ -32,8 +32,11 @@ export const delUserHandler: RouteHandler = async (
     }
 
     // Publish user.deleted event
-    await userPublisher(events.UserDeleted.type, {
-        userId: email,
+    await userPublisher({
+        type: Types.UserDeleted,
+        data: {
+            userId: email,
+        },
     });
 
     return {
