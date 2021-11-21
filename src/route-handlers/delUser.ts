@@ -4,8 +4,10 @@ import {
     RequestValidationError,
     DeleteRecordResponseBody,
     RouteHandler,
+    events,
 } from '@jmsoffredi/ms-common';
 import { User } from '../models/user';
+import { userPublisher } from '../events/user-publisher';
 
 export const delUserHandler: RouteHandler = async (
     event: APIGatewayProxyEvent,
@@ -29,10 +31,10 @@ export const delUserHandler: RouteHandler = async (
         throw new DatabaseError(`Could not delete user with email: ${email}`);
     }
 
-    // Publish authorization.user.deleted event
-    // await publisher(AuthEventDetailTypes.AuthUserDeleted, {
-    //     userId: id,
-    // });
+    // Publish user.deleted event
+    await userPublisher(events.UserDeleted.type, {
+        userId: email,
+    });
 
     return {
         deleted: email,
