@@ -15,7 +15,7 @@ export const userPublisher = async (
     await publisher(
         type,
         data,
-        detailType,
+        detailType || type,
         eventBusType,
         eventBuses[Config.events.eventBusType].busName,
         EventSources.Users,

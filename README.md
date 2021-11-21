@@ -124,3 +124,94 @@ To test local endpoints you can use Postman or any other API request utility lik
 ### Stopping the service locally
 
 To stop the service(es) all you need to do is press `Ctrl + C` on your Overmind terminal, or if you are in the 3 terminals setup, you need to do the same on each terminal (`Ctrl + C` on each of them).
+
+## Deployment
+
+### Accessing local DynamoDB for development purposes
+
+When you are developing locally, and working with a local instance (SAM/Docker), you are most likely using a local DynamoDB too, which runs in a Docker container too and stores the data in a `/docker` folder (ignored in the repo). This helps by persisting the DB data locally so you don't always start with an empty DB.
+
+Sometimes you need to access the DB data to validate development efforts and for that purpose we recommend using [dynamodb-admin](https://www.npmjs.com/package/dynamodb-admin) which creates a nice web-based interface you can open in any browser with full access to the data inside.
+
+### Deploying to AWS Dev Account from local
+
+Warning: local deployment to AWS is discouraged in favor of our CI/CD configuration. This is meant for CI/CD development and/or testing purposes and required an AWS account with almost admin privileges.
+
+By dev here we mean deploying into an actual AWS account used for development purposes. In order to do that you basically need to build your project and deploy it by using the SAM CLI.
+
+Before trying the next command make sure you have your AWS CLI installed and configured properly with a user with enough permissions to performe the deploy:
+
+```bash
+$ sam build
+```
+
+To deploy from local you will need:
+
+-   **A valid email address**: this is the super admin user email address the system will use to create the first user in your deployed Cognito User Pool to you have an initial access to the authorization system. This email address will be used also by the deployment script to create an initial user, role, and permissions for the user to have full access to the authorization service API.
+
+And then deploy using the SAM CLI too:
+
+```bash
+$ sam deploy --guided
+```
+
+You are going to be prompted into answering a series of questions which will simplify the deployment command for you. Here's an example:
+
+```
+Looking for config file [samconfig.toml] :  Not found
+
+Setting default arguments for 'sam deploy'
+=========================================
+Stack Name [sam-app]: ms-user
+AWS Region [us-east-1]:
+Parameter SuperAdminEmail []: <Enter a real email address here>
+#Shows you resources changes to be deployed and require a 'Y' to initiate deploy
+Confirm changes before deploy [y/N]:
+#SAM needs permission to be able to create roles to connect to the resources in your template
+Allow SAM CLI IAM role creation [Y/n]:
+Save arguments to configuration file [Y/n]:
+SAM configuration file [samconfig.toml]:
+SAM configuration environment [default]:
+```
+
+This command above should create all the necessary resources including CloudFormation stack and S3 deployment bucket. **Some of these resources will be created with unique randomly generated names and will persist even after a full cleanup (see cleanup command below)**.
+
+By the default, if you followed the answers above, CloudFormation will save your answers and remember them for the next run in a file `samconfig.toml`. This file is ignored by default and won't be pushed into the GitHub repo (**and it shouldn't!**).
+
+### Deploying to AWS using the GitHub CI/CD
+
+A normal deployment to AWS using the project's CI/CD configuration will happen if you create and promote changes through a new branch (typically out of `main` branch), and create a Pull Request (PR) to merge your branch changes into `main`.
+
+When the PR is ready to be merged into `main` and you trigger the action GitHub will run the project's GitHub actions including a full deploy to AWS.
+
+For the above deployment to be successful, you need more configuration to be in place in your GitHub repository. That will include having the required secrets configured as stated in the next sub-section.
+
+#### Adding secrets to your GitHub repository
+
+In order for the AWS deployment GitHub action to work you need to add some secrets to your GitHub repository. These are the secrets and what to include in them:
+
+-   `AWS_REGION` = Your prefered region, e.g. us-east-1
+-   `AWS_ACCESS_KEY_ID` = A valid AWS account user access key (must have enough privileges to deploy the stack)
+-   `AWS_SECRET_ACCESS_KEY` = A matching secret access key for the same user above
+-   `SUPER_ADMIN_EMAIL` = The email address of the super admin added as first user to the user pool
+-   `DEPLOY_S3_BUCKET` = An S3 bucket name to use for deployment purposes (this must be unique in the entire AWS)
+
+I recommend you take note of all of these configurations in a personal document or similar because you won't have access to these values in the future. The ones you want to be careful about are `AWS_ACCESS_KEY_ID` & `AWS_DECRET_ACCESS_KEY` (for these please follow AWS best practices in handling them and saving them for later. I save them in AWS Secret Manager).
+
+### Removing everything from AWS at once
+
+If at any point you want to actually remove the entire solution from AWS, you can run this command in your command line (with AWS CLI):
+
+```
+$ aws cloudformation delete-stack --stack-name ms-user
+```
+
+This will ask AWS Cloudformation to use the template.yml and your current account deployment to select and remove all related configurations and services. Be advice this may take a few mins to complete even if you see the command finishing right away.
+
+### AWS associated costs
+
+This project stack can stay mostly within the AWS free tier, therefore, not produce any fix recurrent costs associated to the infrastructure deployed.
+
+However, traffic obviously will consume from a different separate cost centers and eventually may produce some costs for you under your AWS account.
+
+Anyways, from a development point ov view we are not currently incurring in any costs associated to this project and we have it permanently deployed in AWS.
