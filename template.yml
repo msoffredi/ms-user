@@ -73,12 +73,12 @@ Resources:
                 UsersV0Delete:
                     Type: Api
                     Properties:
-                        Path: /v0/users/{email}
+                        Path: /v0/users/{id}
                         Method: delete
                 UsersV0GetOne:
                     Type: Api
                     Properties:
-                        Path: /v0/users/{email}
+                        Path: /v0/users/{id}
                         Method: get
 
     # Shared layer with Lambda runtime dependencies
@@ -100,10 +100,10 @@ Resources:
             BillingMode: PAY_PER_REQUEST
             TableName: ms-user
             AttributeDefinitions:
-                - AttributeName: email
+                - AttributeName: id
                   AttributeType: S
             KeySchema:
-                - AttributeName: email
+                - AttributeName: id
                   KeyType: HASH
 
 Outputs:

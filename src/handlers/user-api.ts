@@ -35,7 +35,7 @@ export const handler = async (
 
     try {
         switch (event.resource) {
-            case '/v0/users/{email}':
+            case '/v0/users/{id}':
                 switch (event.httpMethod) {
                     case 'GET':
                         body = await routeAuthorizer(event, getOneUserHandler, [

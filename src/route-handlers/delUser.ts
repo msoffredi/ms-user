@@ -12,34 +12,34 @@ import { userPublisher } from '../events/user-publisher';
 export const delUserHandler: RouteHandler = async (
     event: APIGatewayProxyEvent,
 ): Promise<DeleteRecordResponseBody> => {
-    if (!event.pathParameters || !event.pathParameters.email) {
+    if (!event.pathParameters || !event.pathParameters.id) {
         throw new RequestValidationError([
             {
-                message: 'Email missing in URL or invalid',
-                field: 'email',
+                message: 'User id missing in URL or invalid',
+                field: 'id',
             },
         ]);
     }
 
-    const { email } = event.pathParameters;
+    const { id } = event.pathParameters;
 
-    const user = await User.get(email);
+    const user = await User.get(id);
 
     if (user) {
-        await User.delete(email);
+        await User.delete(id);
     } else {
-        throw new DatabaseError(`Could not delete user with email: ${email}`);
+        throw new DatabaseError(`Could not delete user with id: ${id}`);
     }
 
     // Publish user.deleted event
     await userPublisher({
         type: Types.UserDeleted,
         data: {
-            userId: email,
+            userId: id,
         },
     });
 
     return {
-        deleted: email,
+        deleted: id,
     };
 };
