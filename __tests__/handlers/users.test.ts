@@ -4,11 +4,13 @@ import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
 import { userPublisher } from '../../src/events/user-publisher';
 import { Types } from '@jmsoffredi/ms-common';
 
+const testUser = {
+    id: 'user123',
+    email: 'test@test.com',
+};
+
 const addUser = async (): Promise<UserDoc> => {
-    return await User.create({
-        email: 'test@test.com',
-        id: 'user123',
-    });
+    return await User.create(testUser);
 };
 
 it('should return a 200 and array of users', async () => {
@@ -61,22 +63,22 @@ it('throws an error if calling POST without proper data', async () => {
 });
 
 it('should return a 200 and a user on GET with id', async () => {
-    const user = await addUser();
+    await addUser();
 
     const getEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'GET',
-            resource: '/v0/users/{email}',
-            pathParameters: { email: user.email },
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
         },
     );
     const result = await handler(getEvent);
 
     expect(result.statusCode).toEqual(200);
     expect(JSON.parse(result.body)).toMatchObject({
-        email: user.email,
-        id: user.id,
+        id: testUser.id,
+        email: testUser.email,
     });
 });
 
@@ -85,8 +87,8 @@ it('throws a 422 error if the id provided to retrieve a user is not found', asyn
         {},
         {
             method: 'GET',
-            resource: '/v0/users/{email}',
-            pathParameters: { email: 'wrong-email' },
+            resource: '/v0/users/{id}',
+            pathParameters: { id: 'wrong-id' },
         },
     );
     const getResult = await handler(getEvent);
@@ -98,7 +100,7 @@ it('throws an error if we do not provide a user id on get', async () => {
         {},
         {
             method: 'GET',
-            resource: '/v0/users/{email}',
+            resource: '/v0/users/{id}',
         },
     );
     const delResult = await handler(deleteEvent);
@@ -106,29 +108,29 @@ it('throws an error if we do not provide a user id on get', async () => {
 });
 
 it('deletes a user when calling endpoint with id and DELETE method', async () => {
-    const user = await addUser();
+    await addUser();
 
-    const result = await User.get(user.email);
+    const result = await User.get(testUser.id);
     expect(result).toBeDefined();
 
     const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'DELETE',
-            resource: '/v0/users/{email}',
-            pathParameters: { email: user.email },
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
         },
     );
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(200);
 
-    const result2 = await User.get(user.email);
+    const result2 = await User.get(testUser.id);
     expect(result2).toBeUndefined();
 
     expect(userPublisher).toHaveBeenCalledWith({
         type: Types.UserDeleted,
         data: {
-            userId: user.email,
+            userId: testUser.id,
         },
     });
 });
@@ -138,7 +140,7 @@ it('throws an error if we do not provide an user id on delete', async () => {
         {},
         {
             method: 'DELETE',
-            resource: '/v0/users/{email}',
+            resource: '/v0/users/{id}',
         },
     );
     const delResult = await handler(deleteEvent);
@@ -150,8 +152,8 @@ it('throws a 422 error if the id provided to delete a user is not found', async 
         {},
         {
             method: 'DELETE',
-            resource: '/v0/users/{email}',
-            pathParameters: { email: 'wrong-email' },
+            resource: '/v0/users/{id}',
+            pathParameters: { id: 'wrong-id' },
         },
     );
     const delResult = await handler(deleteEvent);

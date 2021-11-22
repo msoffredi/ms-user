@@ -5,18 +5,20 @@ import { localModelOptions, Serializers, SerializersOptions } from './_common';
 interface UserDoc extends Document {
     id: string;
     email: string;
+    deletedAt?: number;
 }
 
 const userSchema = new dynamoose.Schema(
     {
-        email: {
+        id: {
             type: String,
             hashKey: true,
         },
-        id: {
+        email: {
             type: String,
             required: true,
         },
+        deletedAt: Date,
     },
     {
         timestamps: true,

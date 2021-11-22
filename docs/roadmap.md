@@ -1,7 +1,7 @@
 # Unordered list of features in the roadmap
 
--   Add exported Postman collection to the repo
--   Convert user ID into PK and validate email address is unique
+-   Import Cognito existing resource automatically into SAM template (using evironment variable?)
+-   Validate email address is unique
 
 -   List all users API endpoint pagination
 -   Replay of events (or latest events) on new version deploy + archive of latest events (or all events?)

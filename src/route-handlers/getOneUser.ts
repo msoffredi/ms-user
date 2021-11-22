@@ -10,21 +10,21 @@ import { Serializers } from '../models/_common';
 export const getOneUserHandler: RouteHandler = async (
     event: APIGatewayProxyEvent,
 ): Promise<UserDoc> => {
-    if (!event.pathParameters || !event.pathParameters.email) {
+    if (!event.pathParameters || !event.pathParameters.id) {
         throw new RequestValidationError([
             {
-                message: 'Email missing in URL or invalid',
-                field: 'email',
+                message: 'User id missing in URL or invalid',
+                field: 'id',
             },
         ]);
     }
 
-    const { email } = event.pathParameters;
+    const { id } = event.pathParameters;
 
-    const user = await User.get(email);
+    const user = await User.get(id);
 
     if (!user) {
-        throw new DatabaseError(`Could not retrieve user with email: ${email}`);
+        throw new DatabaseError(`Could not retrieve user with id: ${id}`);
     }
 
     return new User(await user.serialize(Serializers.RemoveTimestamps));

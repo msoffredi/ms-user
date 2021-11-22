@@ -3,10 +3,8 @@ module.exports = {
     tables: [
         {
             TableName: 'ms-user',
-            KeySchema: [{ AttributeName: 'email', KeyType: 'HASH' }],
-            AttributeDefinitions: [
-                { AttributeName: 'email', AttributeType: 'S' },
-            ],
+            KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+            AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
             ProvisionedThroughput: {
                 ReadCapacityUnits: 1,
                 WriteCapacityUnits: 1,
