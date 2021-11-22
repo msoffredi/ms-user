@@ -1,5 +1,9 @@
 .PHONY: build-RuntimeDependenciesLayer build-lambda-common
 .PHONY: build-MsUserAPIFunction
+.PHONY: build-MsUserInitFunction
+
+build-MsUserInitFunction:
+	$(MAKE) HANDLER=src/handlers/init.ts build-lambda-common
 
 build-MsUserAPIFunction:
 	$(MAKE) HANDLER=src/handlers/user-api.ts build-lambda-common

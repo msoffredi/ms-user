@@ -32,6 +32,26 @@ Globals:
             AllowCredentials: "'*'"
 
 Resources:
+    MsUserInitFunction:
+        Type: AWS::Serverless::Function
+        Metadata:
+            BuildMethod: makefile
+        Properties:
+            Handler: dist/handlers/init.handler
+            Description: User serverless microservice init lambda function
+            Runtime: nodejs14.x
+            Environment:
+                Variables:
+                    DYNAMODB_URI: ''
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref DynamoDBUsersTable
+                - Statement:
+                      - Effect: Allow
+                        Resource: '*'
+                        Action:
+                            - events:PutEvents
+
     MsUserAPIFunction:
         Type: AWS::Serverless::Function
         Metadata:
