@@ -1,6 +1,5 @@
 # Unordered list of features in the roadmap
 
--   Add authorization to API endpoints
 -   Add exported Postman collection to the repo
 -   Convert user ID into PK and validate email address is unique
 
