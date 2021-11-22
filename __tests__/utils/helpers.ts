@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
+import jwt from 'jsonwebtoken';
 
 export const testUserEmail = 'test@test.com';
 export const readUsersPermissionId = 'authorization-api-read-users';
@@ -24,48 +25,26 @@ export function constructAPIGwEvent(
     };
 }
 
-// export const constructAuthenticatedAPIGwEvent = (
-//     message: unknown,
-//     options: Record<string, unknown>,
-//     userEmail = testUserEmail,
-// ): APIGatewayProxyEvent => {
-//     const token = jwt.sign(
-//         {
-//             email: userEmail,
-//         },
-//         'test',
-//     );
+export const constructAuthenticatedAPIGwEvent = (
+    message: unknown,
+    options: Record<string, unknown>,
+    userEmail = testUserEmail,
+    userPermissions = [['*', '*']],
+): APIGatewayProxyEvent => {
+    const token = jwt.sign(
+        {
+            email: userEmail,
+            userPermissions: JSON.stringify(userPermissions),
+        },
+        'test',
+    );
 
-//     const event = constructAPIGwEvent(message, options);
+    const event = constructAPIGwEvent(message, options);
 
-//     event.headers = {
-//         ...event.headers,
-//         Authorization: `Bearer ${token}`,
-//     };
+    event.headers = {
+        ...event.headers,
+        Authorization: `Bearer ${token}`,
+    };
 
-//     return event;
-// };
-
-// /**
-//  * detail format: { type: 'user.deleted', userId: 'test@test.com' }
-//  *
-//  * @param detailType
-//  * @param detail
-//  * @returns
-//  */
-// export const constructEventBridgeEvent = (
-//     detailType: AuthEventsDetailTypes,
-//     detail: AuthEventDetail,
-// ): EventBridgeEvent<AuthEventsDetailTypes, AuthEventDetail> => {
-//     return {
-//         version: '0',
-//         id: '123456',
-//         'detail-type': detailType,
-//         source: 'test.users',
-//         account: '123456789',
-//         time: new Date().toISOString(),
-//         region: 'us-east-1',
-//         resources: [],
-//         detail: detail,
-//     };
-// };
+    return event;
+};

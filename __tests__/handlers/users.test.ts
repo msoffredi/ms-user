@@ -1,6 +1,6 @@
 import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
-import { constructAPIGwEvent } from '../utils/helpers';
+import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
 import { userPublisher } from '../../src/events/user-publisher';
 import { Types } from '@jmsoffredi/ms-common';
 
@@ -14,7 +14,7 @@ const addUser = async (): Promise<UserDoc> => {
 it('should return a 200 and array of users', async () => {
     await addUser();
 
-    const getAllEvent = constructAPIGwEvent(
+    const getAllEvent = constructAuthenticatedAPIGwEvent(
         {},
         { method: 'GET', resource: '/v0/users' },
     );
@@ -31,7 +31,7 @@ it('returns 200 and adds a new user on proper POST call', async () => {
         id: 'user123',
     };
 
-    const postRoleEvent = constructAPIGwEvent(payload, {
+    const postRoleEvent = constructAuthenticatedAPIGwEvent(payload, {
         method: 'POST',
         resource: '/v0/users',
     });
@@ -48,7 +48,7 @@ it('returns 200 and adds a new user on proper POST call', async () => {
 });
 
 it('throws an error if calling POST without proper data', async () => {
-    const event = constructAPIGwEvent(
+    const event = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'POST',
@@ -63,7 +63,7 @@ it('throws an error if calling POST without proper data', async () => {
 it('should return a 200 and a user on GET with id', async () => {
     const user = await addUser();
 
-    const getEvent = constructAPIGwEvent(
+    const getEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'GET',
@@ -81,7 +81,7 @@ it('should return a 200 and a user on GET with id', async () => {
 });
 
 it('throws a 422 error if the id provided to retrieve a user is not found', async () => {
-    const getEvent = constructAPIGwEvent(
+    const getEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'GET',
@@ -94,7 +94,7 @@ it('throws a 422 error if the id provided to retrieve a user is not found', asyn
 });
 
 it('throws an error if we do not provide a user id on get', async () => {
-    const deleteEvent = constructAPIGwEvent(
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'GET',
@@ -111,7 +111,7 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
     const result = await User.get(user.email);
     expect(result).toBeDefined();
 
-    const deleteEvent = constructAPIGwEvent(
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'DELETE',
@@ -134,7 +134,7 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
 });
 
 it('throws an error if we do not provide an user id on delete', async () => {
-    const deleteEvent = constructAPIGwEvent(
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'DELETE',
@@ -146,7 +146,7 @@ it('throws an error if we do not provide an user id on delete', async () => {
 });
 
 it('throws a 422 error if the id provided to delete a user is not found', async () => {
-    const deleteEvent = constructAPIGwEvent(
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
         {
             method: 'DELETE',
