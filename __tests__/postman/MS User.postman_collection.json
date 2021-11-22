@@ -1,0 +1,231 @@
+{
+	"info": {
+		"_postman_id": "20f0dd15-dfd6-45a5-829e-17b79d37e981",
+		"name": "MS User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Healthcheck",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{ms-user-url}}/healthcheck",
+					"host": [
+						"{{ms-user-url}}"
+					],
+					"path": [
+						"healthcheck"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Users",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{ms-user-url}}/v0/users",
+					"host": [
+						"{{ms-user-url}}"
+					],
+					"path": [
+						"v0",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"test@test.com\"\n}"
+				},
+				"url": {
+					"raw": "{{ms-user-url}}/v0/users",
+					"host": [
+						"{{ms-user-url}}"
+					],
+					"path": [
+						"v0",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One User",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{ms-user-url}}/v0/users/:email",
+					"host": [
+						"{{ms-user-url}}"
+					],
+					"path": [
+						"v0",
+						"users",
+						":email"
+					],
+					"variable": [
+						{
+							"key": "email",
+							"value": "test@test.com"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{ms-user-url}}/v0/users/:email",
+					"host": [
+						"{{ms-user-url}}"
+					],
+					"path": [
+						"v0",
+						"users",
+						":email"
+					],
+					"variable": [
+						{
+							"key": "email",
+							"value": "test@test.com"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{ms-user-token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"var jwtSecret = pm.environment.get('jwt_secret') || ''",
+					"",
+					"// Set headers for JWT",
+					"var header = {",
+					"\t'typ': 'JWT',",
+					"\t'alg': 'HS256'",
+					"};",
+					"",
+					"// Prepare timestamp in seconds",
+					"var currentTimestamp = Math.floor(Date.now() / 1000)",
+					"",
+					"var data = {",
+					"\t'iss': pm.environment.get('jwt_iss') || '',",
+					"\t'ist': pm.environment.get('jwt_ist') || '',",
+					"\t'iat': currentTimestamp,",
+					"\t'exp': currentTimestamp + 30, // expiry time is 30 seconds from time of creation",
+					"\t'jti': 'jwt_nonce',",
+					"    'email': 'msoffredi@gmail.com', // must match the application super user email",
+					"    'userPermissions': JSON.stringify([['*', '*']])",
+					"}",
+					"",
+					"function base64url(source) {",
+					"    // Encode in classical base64",
+					"    encodedSource = CryptoJS.enc.Base64.stringify(source)",
+					"    ",
+					"    // Remove padding equal characters",
+					"    encodedSource = encodedSource.replace(/=+$/, '')",
+					"    ",
+					"    // Replace characters according to base64url specifications",
+					"    encodedSource = encodedSource.replace(/\\+/g, '-')",
+					"    encodedSource = encodedSource.replace(/\\//g, '_')",
+					"    ",
+					"    return encodedSource",
+					"}",
+					"",
+					"// encode header",
+					"var stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header))",
+					"var encodedHeader = base64url(stringifiedHeader)",
+					"",
+					"// encode data",
+					"var stringifiedData = CryptoJS.enc.Utf8.parse(JSON.stringify(data))",
+					"var encodedData = base64url(stringifiedData)",
+					"",
+					"// build token",
+					"var token = `${encodedHeader}.${encodedData}`",
+					"",
+					"// sign token",
+					"var signature = CryptoJS.HmacSHA256(token, jwtSecret)",
+					"signature = base64url(signature)",
+					"var signedToken = `${token}.${signature}`",
+					"",
+					"pm.environment.set('ms-user-token', signedToken)",
+					"console.log('Signed and non-encoded JWT', signedToken)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

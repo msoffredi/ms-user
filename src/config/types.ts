@@ -1,4 +1,4 @@
-import { EventBusTypes } from '@jmsoffredi/ms-common';
+import { AuthPermission, EventBusTypes } from '@jmsoffredi/ms-common';
 
 export interface ConfigType {
     events: {
@@ -8,4 +8,21 @@ export interface ConfigType {
             eventDataLocation: string;
         };
     };
+    userService: {
+        users: {
+            readUsers: AuthPermission;
+            deleteUser: AuthPermission;
+            createUser: AuthPermission;
+        };
+    };
+}
+
+export enum UsersModules {
+    Users = 'users-api-users',
+}
+
+export enum UsersOperations {
+    Read = 'read',
+    Create = 'create',
+    Delete = 'delete',
 }

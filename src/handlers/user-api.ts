@@ -6,12 +6,14 @@ import {
     BadRequestError,
     CustomError,
     ResponseBody,
+    routeAuthorizer,
 } from '@jmsoffredi/ms-common';
 import { getOneUserHandler } from '../route-handlers/getOneUser';
 import { delUserHandler } from '../route-handlers/delUser';
 import { getUsersHandler } from '../route-handlers/getUsers';
 import { postUserHandler } from '../route-handlers/postUser';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
+import { Config } from '../config';
 
 if (process.env.AWS_SAM_LOCAL) {
     if (process.env.DYNAMODB_URI) {
@@ -29,16 +31,21 @@ export const handler = async (
 
     let status = 200;
     let body: ResponseBody = null;
+    const perm = Config.userService;
 
     try {
         switch (event.resource) {
             case '/v0/users/{email}':
                 switch (event.httpMethod) {
                     case 'GET':
-                        body = await getOneUserHandler(event);
+                        body = await routeAuthorizer(event, getOneUserHandler, [
+                            perm.users.readUsers,
+                        ]);
                         break;
                     case 'DELETE':
-                        body = await delUserHandler(event);
+                        body = await routeAuthorizer(event, delUserHandler, [
+                            perm.users.deleteUser,
+                        ]);
                         break;
                     default:
                         throw new BadMethodError();
@@ -48,10 +55,14 @@ export const handler = async (
             case '/v0/users':
                 switch (event.httpMethod) {
                     case 'GET':
-                        body = await getUsersHandler(event);
+                        body = await routeAuthorizer(event, getUsersHandler, [
+                            perm.users.readUsers,
+                        ]);
                         break;
                     case 'POST':
-                        body = await postUserHandler(event);
+                        body = await routeAuthorizer(event, postUserHandler, [
+                            perm.users.createUser,
+                        ]);
                         break;
                     default:
                         throw new BadMethodError();
