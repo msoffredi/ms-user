@@ -1,6 +1,8 @@
+import { Types } from '@jmsoffredi/ms-common';
 import { randomUUID } from 'crypto';
 import dynamoose from 'dynamoose';
 import { exit } from 'process';
+import { userPublisher } from '../events/user-publisher';
 import { User } from '../models/user';
 
 if (process.env.AWS_SAM_LOCAL) {
@@ -16,15 +18,32 @@ export const handler = async (): Promise<void> => {
     console.log('Init function started...');
 
     if (process.env.SUPER_ADMIN_EMAIL) {
-        const user = await User.create({
-            id: randomUUID(),
-            email: process.env.SUPER_ADMIN_EMAIL,
-        });
+        const users = await User.scan().all().exec();
 
-        if (user) {
-            console.log(
-                `User with email ${process.env.SUPER_ADMIN_EMAIL} created`,
-            );
+        if (users.length <= 0) {
+            const user = await User.create({
+                id: randomUUID(),
+                email: process.env.SUPER_ADMIN_EMAIL,
+            });
+
+            if (user) {
+                // Publish user.created event
+                await userPublisher({
+                    type: Types.UserCreated,
+                    data: {
+                        id: user.id,
+                        email: user.email,
+                    },
+                });
+
+                console.log(
+                    `User with email ${process.env.SUPER_ADMIN_EMAIL} created`,
+                );
+            }
+        } else {
+            console.log('DDB table not empty. Super user not added');
         }
+    } else {
+        console.log('No super admin email defined in environment variable');
     }
 };
