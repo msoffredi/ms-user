@@ -1,6 +1,8 @@
+import { Types } from '@jmsoffredi/ms-common';
 import { randomUUID } from 'crypto';
 import dynamoose from 'dynamoose';
 import { exit } from 'process';
+import { userPublisher } from '../events/user-publisher';
 import { User } from '../models/user';
 
 if (process.env.AWS_SAM_LOCAL) {
@@ -25,6 +27,15 @@ export const handler = async (): Promise<void> => {
             });
 
             if (user) {
+                // Publish user.created event
+                await userPublisher({
+                    type: Types.UserCreated,
+                    data: {
+                        id: user.id,
+                        email: user.email,
+                    },
+                });
+
                 console.log(
                     `User with email ${process.env.SUPER_ADMIN_EMAIL} created`,
                 );
