@@ -21,10 +21,10 @@ Globals:
     Api:
         Auth:
             Authorizers:
-                MsUserCognitoAuthorizer:
-                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_0T89UPDv9
+                MsIdCognitoAuthorizer:
+                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_ZV75Z8oNA
                     AuthType: COGNITO_USER_POOLS
-            DefaultAuthorizer: MsUserCognitoAuthorizer
+            DefaultAuthorizer: MsIdCognitoAuthorizer
         Cors:
             AllowMethods: "'GET,OPTIONS'"
             AllowHeaders: "'content-type'"
