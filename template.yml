@@ -7,6 +7,9 @@ Parameters:
     SuperAdminEmail:
         Type: String
         Description: The email address of the default user to be added to the Cognito user pool by default
+    CognitoUserPoolArn:
+        Type: String
+        Description: Imported Cognito User Pool Arn to use in the template
 
 Globals:
     Function:
@@ -22,7 +25,7 @@ Globals:
         Auth:
             Authorizers:
                 MsIdCognitoAuthorizer:
-                    UserPoolArn: arn:aws:cognito-idp:us-east-1:653284769887:userpool/us-east-1_ZV75Z8oNA
+                    UserPoolArn: !Ref CognitoUserPoolArn
                     AuthType: COGNITO_USER_POOLS
             DefaultAuthorizer: MsIdCognitoAuthorizer
         Cors:
