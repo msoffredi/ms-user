@@ -24,4 +24,4 @@ jobs:
               run: echo "COGNITO_USER_POOL_ARN=$(node .deploy/get-cognito-user-pool-arn.js)" >> $GITHUB_ENV
 
             - name: SAM Deploy
-              run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ms-user --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} --s3-prefix ms-user --capabilities CAPABILITY_IAM --region ${{ secrets.AWS_REGION }} --parameter-overrides SuperAdminEmail=${{ secrets.SUPER_ADMIN_EMAIL }}
+              run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ms-user --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} --s3-prefix ms-user --capabilities CAPABILITY_IAM --region ${{ secrets.AWS_REGION }} --parameter-overrides SuperAdminEmail=${{ secrets.SUPER_ADMIN_EMAIL }}  CognitoUserPoolArn=${{ env.COGNITO_USER_POOL_ARN }}
