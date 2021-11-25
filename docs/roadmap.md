@@ -1,6 +1,5 @@
 # Unordered list of features in the roadmap
 
--   Import Cognito existing resource automatically into SAM template (using evironment variable?)
 -   Validate email address is unique
 -   Allow for soft delete (default) and hard delete
 -   List all users API endpoint pagination
