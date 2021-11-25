@@ -1,0 +1,8 @@
+{
+    "name": "ms-auth-deploy",
+    "version": "0.1.0",
+    "main": "post-deploy.js",
+    "author": "Marcelo Soffredi",
+    "license": "MIT",
+    "type": "module"
+}
