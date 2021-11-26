@@ -129,16 +129,12 @@ Resources:
                 - AttributeName: id
                   KeyType: HASH
 
-Outputs:
-    MsUserAPIProd:
-        Description: 'API Gateway endpoint URL for Prod environment'
-        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
-    MsUserAPIStage:
-        Description: 'API Gateway endpoint URL for Stage environment'
-        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Stage'
-    MsUserAPIFunction:
-        Description: 'User API Lambda Function ARN'
-        Value: !GetAtt MsUserAPIFunction.Arn
-    MsUserAPIFunctionIamRole:
-        Description: 'Implicit IAM Role created for User API function'
-        Value: !GetAtt MsUserAPIFunctionRole.Arn
+    # MsUserEventsArchive:
+    #     Type: AWS::Events::Archive
+    #     Properties:
+    #         ArchiveName: 'ms-user-all'
+    #         Description: 'User microservice events archive for all events'
+    #         EventPattern:
+    #             source:
+    #                 - 'user-service'
+    #         SourceArn: !Sub arn:aws:events:${AWS:Region}:${AWS::AccountId}:event-bus/default

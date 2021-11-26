@@ -49,6 +49,22 @@ it('returns 200 and adds a new user on proper POST call', async () => {
     });
 });
 
+it('throws an error if trying to add a user with existing email', async () => {
+    const payload = {
+        email: 'newuser@test.com',
+    };
+
+    const postRoleEvent = constructAuthenticatedAPIGwEvent(payload, {
+        method: 'POST',
+        resource: '/v0/users',
+    });
+    const result = await handler(postRoleEvent);
+    expect(result.statusCode).toEqual(200);
+
+    const result2 = await handler(postRoleEvent);
+    expect(result2.statusCode).toEqual(400);
+});
+
 it('throws an error if calling POST without proper data', async () => {
     const event = constructAuthenticatedAPIGwEvent(
         {},
@@ -130,7 +146,8 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
     expect(userPublisher).toHaveBeenCalledWith({
         type: Types.UserDeleted,
         data: {
-            userId: testUser.id,
+            id: testUser.id,
+            email: testUser.email,
         },
     });
 });

@@ -126,19 +126,19 @@
 					}
 				],
 				"url": {
-					"raw": "{{ms-user-url}}/v0/users/:email",
+					"raw": "{{ms-user-url}}/v0/users/:id",
 					"host": [
 						"{{ms-user-url}}"
 					],
 					"path": [
 						"v0",
 						"users",
-						":email"
+						":id"
 					],
 					"variable": [
 						{
-							"key": "email",
-							"value": "test@test.com"
+							"key": "id",
+							"value": "edecf8a4-23ea-451c-ade6-793d552ee316"
 						}
 					]
 				}
