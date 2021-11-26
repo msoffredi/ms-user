@@ -30,6 +30,15 @@ export const postUserHandler: RouteHandler = async (
             message: 'User email is missing in provided body',
             field: 'email',
         });
+    } else {
+        const users = await User.scan().where('email').eq(request.email).exec();
+
+        if (users.length) {
+            errors.push({
+                message: 'User email already exists.',
+                field: 'email',
+            });
+        }
     }
 
     if (errors.length) {

@@ -1,6 +1,5 @@
 # Unordered list of features in the roadmap
 
--   Validate email address is unique
 -   Allow for soft delete (default) and hard delete
 -   List all users API endpoint pagination
 -   Replay of events (or latest events) on new version deploy + archive of latest events (or all events?)
