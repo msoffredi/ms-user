@@ -35,7 +35,8 @@ export const delUserHandler: RouteHandler = async (
     await userPublisher({
         type: Types.UserDeleted,
         data: {
-            userId: id,
+            id,
+            email: user.email,
         },
     });
 
