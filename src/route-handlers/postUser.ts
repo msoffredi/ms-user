@@ -4,10 +4,10 @@ import {
     DatabaseError,
     RequestValidationError,
     RouteHandler,
+    Serializers,
     Types,
 } from '@jmsoffredi/ms-common';
 import { User, UserDoc } from '../models/user';
-import { Serializers } from '../models/_common';
 import { userPublisher } from '../events/user-publisher';
 
 export const postUserHandler: RouteHandler = async (

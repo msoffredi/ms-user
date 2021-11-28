@@ -1,6 +1,5 @@
 import { User, UserDoc } from '../models/user';
-import { Serializers } from '../models/_common';
-import { RouteHandler } from '@jmsoffredi/ms-common';
+import { RouteHandler, Serializers } from '@jmsoffredi/ms-common';
 
 export const getUsersHandler: RouteHandler = async (): Promise<UserDoc[]> => {
     // @todo we may not be able to always return all users (we need pagination on this route)

@@ -16,6 +16,11 @@ beforeAll(async () => {
     });
 
     dynamoose.aws.ddb.local('http://localhost:8001');
+
+    if (!process.env.DEBUG) {
+        global.console.log = jest.fn();
+        global.console.error = jest.fn();
+    }
 });
 
 beforeEach(async () => {

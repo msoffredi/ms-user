@@ -1,6 +1,10 @@
+import {
+    modelOptions,
+    Serializers,
+    SerializersOptions,
+} from '@jmsoffredi/ms-common';
 import dynamoose from 'dynamoose';
 import { Document } from 'dynamoose/dist/Document';
-import { localModelOptions, Serializers, SerializersOptions } from './_common';
 
 interface UserDoc extends Document {
     id: string;
@@ -24,7 +28,7 @@ const userSchema = new dynamoose.Schema(
         timestamps: true,
     },
 );
-const User = dynamoose.model<UserDoc>('ms-user', userSchema, localModelOptions);
+const User = dynamoose.model<UserDoc>('ms-user', userSchema, modelOptions);
 
 User.serializer.add(
     Serializers.RemoveTimestamps,
