@@ -23,8 +23,11 @@ it('should return a 200 and array of users', async () => {
 
     const result = await handler(getAllEvent);
     expect(result.statusCode).toEqual(200);
-    expect(JSON.parse(result.body)).toBeInstanceOf(Array);
-    expect(JSON.parse(result.body).length).toBeGreaterThan(0);
+
+    const body = JSON.parse(result.body);
+    expect(body.data).toBeInstanceOf(Array);
+    expect(body.data.length).toBeGreaterThan(0);
+    expect(body.data.length).toEqual(body.count);
 });
 
 it('returns 200 and adds a new user on proper POST call', async () => {
@@ -125,9 +128,9 @@ it('throws an error if we do not provide a user id on get', async () => {
 
 it('deletes a user when calling endpoint with id and DELETE method', async () => {
     await addUser();
-
-    const result = await User.get(testUser.id);
-    expect(result).toBeDefined();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+    expect(user.deletedAt).toBeUndefined();
 
     const deleteEvent = constructAuthenticatedAPIGwEvent(
         {},
@@ -140,8 +143,11 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(200);
 
-    const result2 = await User.get(testUser.id);
-    expect(result2).toBeUndefined();
+    const user2 = await User.get(testUser.id);
+    expect(user2.deletedAt).toBeDefined();
+    expect(new Date(Number(user2.deletedAt)).getDate()).toEqual(
+        new Date().getDate(),
+    );
 
     expect(userPublisher).toHaveBeenCalledWith({
         type: Types.UserDeleted,
@@ -175,4 +181,25 @@ it('throws a 422 error if the id provided to delete a user is not found', async 
     );
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(422);
+});
+
+it('should not return a soft deleted user by default', async () => {
+    const user = await User.create({ id: '1', email: 'test1@test.com' });
+    await User.create({ id: '2', email: 'test2@test.com' });
+    await User.create({ id: '3', email: 'test3@test.com' });
+
+    const getAllEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        { method: 'GET', resource: '/v0/users' },
+    );
+
+    const result = await handler(getAllEvent);
+    expect(result.statusCode).toEqual(200);
+    expect(JSON.parse(result.body).data.length).toEqual(3);
+
+    user.deletedAt = Date.now();
+    await user.save();
+    const result2 = await handler(getAllEvent);
+    expect(result2.statusCode).toEqual(200);
+    expect(JSON.parse(result2.body).data.length).toEqual(2);
 });

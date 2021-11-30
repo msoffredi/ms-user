@@ -6,11 +6,13 @@ import {
 import dynamoose from 'dynamoose';
 import { Document } from 'dynamoose/dist/Document';
 
-interface UserDoc extends Document {
+interface UserRecord {
     id: string;
     email: string;
     deletedAt?: number;
 }
+
+interface UserDoc extends Document, UserRecord {}
 
 const userSchema = new dynamoose.Schema(
     {
@@ -35,4 +37,4 @@ User.serializer.add(
     SerializersOptions[Serializers.RemoveTimestamps],
 );
 
-export { User, UserDoc };
+export { User, UserDoc, UserRecord };
