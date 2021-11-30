@@ -1,12 +1,18 @@
+import {
+    modelOptions,
+    Serializers,
+    SerializersOptions,
+} from '@jmsoffredi/ms-common';
 import dynamoose from 'dynamoose';
 import { Document } from 'dynamoose/dist/Document';
-import { localModelOptions, Serializers, SerializersOptions } from './_common';
 
-interface UserDoc extends Document {
+interface UserRecord {
     id: string;
     email: string;
     deletedAt?: number;
 }
+
+interface UserDoc extends Document, UserRecord {}
 
 const userSchema = new dynamoose.Schema(
     {
@@ -24,11 +30,11 @@ const userSchema = new dynamoose.Schema(
         timestamps: true,
     },
 );
-const User = dynamoose.model<UserDoc>('ms-user', userSchema, localModelOptions);
+const User = dynamoose.model<UserDoc>('ms-user', userSchema, modelOptions);
 
 User.serializer.add(
     Serializers.RemoveTimestamps,
     SerializersOptions[Serializers.RemoveTimestamps],
 );
 
-export { User, UserDoc };
+export { User, UserDoc, UserRecord };

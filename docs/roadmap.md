@@ -1,7 +1,5 @@
 # Unordered list of features in the roadmap
 
--   Allow for soft delete (default) and hard delete
--   List all users API endpoint pagination
 -   Replay of events (or latest events) on new version deploy + archive of latest events (or all events?)
 -   Deploy of some sensitive information into AWS Secrets Manager
 -   API Gateway endpoint caching (with cache purge on updates)

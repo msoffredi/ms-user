@@ -26,19 +26,28 @@ export const delUserHandler: RouteHandler = async (
     const user = await User.get(id);
 
     if (user) {
-        await User.delete(id);
+        try {
+            user.deletedAt = Date.now();
+            await user.save();
+
+            // Publish user.deleted event
+            await userPublisher({
+                type: Types.UserDeleted,
+                data: {
+                    id,
+                    email: user.email,
+                },
+            });
+        } catch (err) {
+            throw new DatabaseError(
+                `Could not delete (soft) user with id ${id}`,
+            );
+        }
+
+        // await User.delete(id);
     } else {
         throw new DatabaseError(`Could not delete user with id: ${id}`);
     }
-
-    // Publish user.deleted event
-    await userPublisher({
-        type: Types.UserDeleted,
-        data: {
-            id,
-            email: user.email,
-        },
-    });
 
     return {
         deleted: id,

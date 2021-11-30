@@ -3,9 +3,9 @@ import {
     DatabaseError,
     RequestValidationError,
     RouteHandler,
+    Serializers,
 } from '@jmsoffredi/ms-common';
 import { User, UserDoc } from '../models/user';
-import { Serializers } from '../models/_common';
 
 export const getOneUserHandler: RouteHandler = async (
     event: APIGatewayProxyEvent,

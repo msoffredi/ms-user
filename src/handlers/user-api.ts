@@ -8,10 +8,10 @@ import {
     ResponseBody,
     routeAuthorizer,
 } from '@jmsoffredi/ms-common';
-import { getOneUserHandler } from '../route-handlers/getOneUser';
-import { delUserHandler } from '../route-handlers/delUser';
-import { getUsersHandler } from '../route-handlers/getUsers';
-import { postUserHandler } from '../route-handlers/postUser';
+import { getOneUserHandler } from '../route-handlers/get-one-user';
+import { delUserHandler } from '../route-handlers/del-user';
+import { getUsersHandler } from '../route-handlers/get-users';
+import { postUserHandler } from '../route-handlers/post-user';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { Config } from '../config';
 
