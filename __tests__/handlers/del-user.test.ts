@@ -1,8 +1,14 @@
 import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
 import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
-import { userPublisher } from '../../src/events/user-publisher';
-import { Types } from '@jmsoffredi/ms-common';
+import {
+    Types,
+    publisher,
+    events,
+    eventBuses,
+    EventSources,
+} from '@jmsoffredi/ms-common';
+import { Config } from '../../src/config';
 
 const testUser = {
     id: 'user123',
@@ -36,13 +42,19 @@ it('deletes a user when calling endpoint with id and DELETE method', async () =>
         new Date().getDate(),
     );
 
-    expect(userPublisher).toHaveBeenCalledWith({
-        type: Types.UserDeleted,
-        data: {
-            id: testUser.id,
-            email: testUser.email,
+    expect(publisher).toHaveBeenCalledWith(
+        {
+            type: Types.UserDeleted,
+            data: {
+                id: testUser.id,
+                email: testUser.email,
+            },
         },
-    });
+        events.UserDeleted.type,
+        Config.events.eventBusType,
+        eventBuses[Config.events.eventBusType].busName,
+        EventSources.Users,
+    );
 });
 
 it('throws an error if we do not provide an user id on delete', async () => {

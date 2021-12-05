@@ -1,7 +1,13 @@
 import { handler } from '../../src/handlers/user-api';
 import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
-import { userPublisher } from '../../src/events/user-publisher';
-import { Types } from '@jmsoffredi/ms-common';
+import {
+    Types,
+    publisher,
+    events,
+    eventBuses,
+    EventSources,
+} from '@jmsoffredi/ms-common';
+import { Config } from '../../src/config';
 
 it('returns 200 and adds a new user on proper POST call', async () => {
     const payload = {
@@ -16,13 +22,19 @@ it('returns 200 and adds a new user on proper POST call', async () => {
     const result = await handler(postRoleEvent);
     expect(result.statusCode).toEqual(200);
     expect(JSON.parse(result.body).id).toEqual(payload.id);
-    expect(userPublisher).toHaveBeenCalledWith({
-        type: Types.UserCreated,
-        data: {
-            id: payload.id,
-            email: payload.email,
+    expect(publisher).toHaveBeenCalledWith(
+        {
+            type: Types.UserCreated,
+            data: {
+                id: payload.id,
+                email: payload.email,
+            },
         },
-    });
+        events.UserCreated.type,
+        Config.events.eventBusType,
+        eventBuses[Config.events.eventBusType].busName,
+        EventSources.Users,
+    );
 });
 
 it('throws an error if trying to add a user with existing email', async () => {

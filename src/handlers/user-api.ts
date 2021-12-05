@@ -5,6 +5,8 @@ import {
     BadMethodError,
     BadRequestError,
     CustomError,
+    events,
+    EventSources,
     ResponseBody,
     routeAuthorizer,
 } from '@jmsoffredi/ms-common';
@@ -14,6 +16,8 @@ import { getUsersHandler } from '../route-handlers/get-users';
 import { postUserHandler } from '../route-handlers/post-user';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { Config } from '../config';
+import { API } from './types';
+import { APIHandler } from './base';
 
 if (process.env.AWS_SAM_LOCAL) {
     if (process.env.DYNAMODB_URI) {
@@ -24,7 +28,59 @@ if (process.env.AWS_SAM_LOCAL) {
     }
 }
 
+export const api: API = {
+    users: {
+        schema: {
+            id: {
+                type: String,
+                hashKey: true,
+            },
+            email: {
+                type: String,
+                required: true,
+            },
+        },
+        api: {
+            get: {
+                collection: true,
+                entity: true,
+            },
+            delete: {
+                entity: {
+                    events: [
+                        {
+                            type: events.UserDeleted.type,
+                            dataProperties: ['id', 'email'],
+                        },
+                    ],
+                },
+            },
+            post: {
+                collection: {
+                    events: [
+                        {
+                            type: events.UserCreated.type,
+                            dataProperties: ['id', 'email'],
+                        },
+                    ],
+                },
+            },
+        },
+        timestamps: true,
+        dbName: 'ms-user',
+        path: '/v0/users',
+        softDelete: true,
+        eventSource: EventSources.Users,
+    },
+};
+
 export const handler = async (
+    event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+    return APIHandler(api, event);
+};
+
+export const handler2 = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     console.log('Received event:', event);

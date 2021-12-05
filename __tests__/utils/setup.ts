@@ -1,7 +1,15 @@
 import dynamoose from 'dynamoose';
 import { clearAllTables } from './dynamodb-utils';
 
-jest.mock('../../src/events/user-publisher');
+jest.mock('@jmsoffredi/ms-common', () => {
+    const originalModule = jest.requireActual('@jmsoffredi/ms-common');
+
+    return {
+        __esModule: true,
+        ...originalModule,
+        publisher: jest.fn(),
+    };
+});
 
 /**
  * jest won't work in watchAll mode because of a known BUG.

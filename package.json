@@ -4,7 +4,7 @@
     "description": "User serverless microservice",
     "private": true,
     "dependencies": {
-        "@jmsoffredi/ms-common": "^0.2.8",
+        "@jmsoffredi/ms-common": "^0.2.12",
         "aws-sdk": "^2.1037.0",
         "dynamoose": "^2.8.2",
         "jsonwebtoken": "^8.5.1",
