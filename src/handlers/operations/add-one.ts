@@ -16,9 +16,10 @@ export const createEntity = async (
     endpoint: Endpoint,
 ): Promise<ResponseBody> => {
     const { apiEntityName, pkName } = endpoint;
-    const errors = validateRequiredParameters(
+    const errors = await validateRequiredParameters(
         event,
-        apiConfig[apiEntityName].schema,
+        apiConfig,
+        apiEntityName,
     );
 
     if (errors.length) {
@@ -39,12 +40,13 @@ export const createEntity = async (
 
         const newEntity = await entityModel.create(newRecord);
 
-        if (apiConfig[apiEntityName].api.post.collection.events) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if (apiConfig[apiEntityName].api.post!.collection.events) {
             await publishEvents(
                 apiConfig[apiEntityName],
                 newEntity,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                apiConfig[apiEntityName].api.post.collection.events!,
+                apiConfig[apiEntityName].api.post!.collection.events!,
             );
         }
 

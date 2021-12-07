@@ -8,6 +8,7 @@ import { createEntity } from './operations/add-one';
 import { deleteEntity } from './operations/delete-one';
 import { getCollection } from './operations/get-collection';
 import { getEntity } from './operations/get-one';
+import { healthcheck } from './operations/healthcheck';
 import { API, APIDefinition, APIEntity, Endpoint } from './types';
 
 export const APIHandler = async (
@@ -35,8 +36,10 @@ export const APIHandler = async (
                             event,
                             endpoints[0],
                         );
-                    } else {
+                    } else if (!endpoints[0].healthcheck) {
                         body = await getEntity(apiConfig, event, endpoints[0]);
+                    } else {
+                        body = await healthcheck();
                     }
 
                     break;
@@ -54,7 +57,6 @@ export const APIHandler = async (
         }
     } catch (err) {
         console.error(err);
-        console.debug(err);
 
         if (err instanceof CustomError) {
             status = err.statusCode;
@@ -72,39 +74,52 @@ const allowedEndpoints = (apiConfig: API): Endpoint[] => {
     const endpoints: Endpoint[] = [];
 
     for (const apiName in apiConfig) {
-        const pkName = getAPIPkName(apiConfig[apiName]);
         let path = `/${apiName}`;
 
-        if ('path' in apiConfig[apiName]) {
-            path = String(apiConfig[apiName].path);
-        }
-
-        for (const methodName in apiConfig[apiName].api) {
-            const method = JSON.parse(
-                JSON.stringify(
-                    apiConfig[apiName].api[methodName as keyof APIDefinition],
-                ),
-            );
-
-            const endpointTemplate = {
-                method: methodName,
+        if (apiConfig[apiName].healthcheck) {
+            endpoints.push({
                 apiEntityName: apiName,
-                pkName: pkName,
-            };
+                pkName: '',
+                method: 'get',
+                resource: `/${apiName}`,
+                healthcheck: true,
+            });
+        } else {
+            const pkName = getAPIPkName(apiConfig[apiName]);
 
-            if (method.collection) {
-                endpoints.push({
-                    ...endpointTemplate,
-                    resource: `${path}`,
-                    collection: true,
-                });
+            if ('path' in apiConfig[apiName]) {
+                path = String(apiConfig[apiName].path);
             }
 
-            if (method.entity) {
-                endpoints.push({
-                    ...endpointTemplate,
-                    resource: `${path}/{${pkName}}`,
-                });
+            for (const methodName in apiConfig[apiName].api) {
+                const endpointTemplate = {
+                    method: methodName,
+                    apiEntityName: apiName,
+                    pkName: pkName,
+                };
+
+                const method = JSON.parse(
+                    JSON.stringify(
+                        apiConfig[apiName].api[
+                            methodName as keyof APIDefinition
+                        ],
+                    ),
+                );
+
+                if (method.collection) {
+                    endpoints.push({
+                        ...endpointTemplate,
+                        resource: path,
+                        collection: true,
+                    });
+                }
+
+                if (method.entity) {
+                    endpoints.push({
+                        ...endpointTemplate,
+                        resource: `${path}/{${pkName}}`,
+                    });
+                }
             }
         }
     }

@@ -16,7 +16,7 @@ import { getUsersHandler } from '../route-handlers/get-users';
 import { postUserHandler } from '../route-handlers/post-user';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { Config } from '../config';
-import { API } from './types';
+import { API, ValidationType } from './types';
 import { APIHandler } from './base';
 
 if (process.env.AWS_SAM_LOCAL) {
@@ -39,6 +39,9 @@ export const api: API = {
                 type: String,
                 required: true,
             },
+        },
+        validations: {
+            email: ValidationType.Unique,
         },
         api: {
             get: {
@@ -71,6 +74,12 @@ export const api: API = {
         path: '/v0/users',
         softDelete: true,
         eventSource: EventSources.Users,
+    },
+    healthcheck: {
+        schema: {},
+        api: {},
+        path: '/healthcheck',
+        healthcheck: true,
     },
 };
 

@@ -10,7 +10,8 @@ export interface Endpoint {
     resource: string;
     method: string;
     apiEntityName: string;
-    collection?: boolean;
+    collection?: true;
+    healthcheck?: true;
     pkName: string;
 }
 
@@ -24,21 +25,28 @@ interface OperationDefinition {
 }
 
 export interface APIDefinition {
-    get: {
+    get?: {
         collection?: boolean;
         entity?: boolean;
     };
-    delete: {
+    delete?: {
         entity: OperationDefinition;
     };
-    post: {
+    post?: {
         collection: OperationDefinition;
     };
+}
+
+export enum ValidationType {
+    Unique = 'unique',
 }
 
 export interface APIEntity {
     schema: SchemaDefinition;
     api: APIDefinition;
+    validations?: {
+        [key: string]: ValidationType[] | ValidationType;
+    };
     timestamps?: boolean | TimestampObject;
     saveUnknown?: boolean | string[];
     dbName?: string;
@@ -46,6 +54,7 @@ export interface APIEntity {
     path?: string;
     softDelete?: boolean;
     eventSource?: string;
+    healthcheck?: boolean;
 }
 
 export interface API {

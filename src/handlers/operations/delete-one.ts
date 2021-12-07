@@ -44,12 +44,13 @@ export const deleteEntity = async (
             await entity.delete();
         }
 
-        if (apiConfig[apiEntityName].api.delete.entity.events) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        if (apiConfig[apiEntityName].api.delete!.entity.events) {
             await publishEvents(
                 apiConfig[apiEntityName],
                 entity,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                apiConfig[apiEntityName].api.delete.entity.events!,
+                apiConfig[apiEntityName].api.delete!.entity.events!,
             );
         }
     } catch (err) {

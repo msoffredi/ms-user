@@ -6,11 +6,12 @@ import {
     Serializers,
     SerializersOptions,
 } from '@jmsoffredi/ms-common';
-import { API, APIEntity, SchemaSettings } from '../types';
+import { API, APIEntity, SchemaSettings, ValidationType } from '../types';
 import { ModelType, ObjectType } from 'dynamoose/dist/General';
 import { AnyDocument } from 'dynamoose/dist/Document';
 import { SchemaDefinition } from 'dynamoose/dist/Schema';
 import { APIGatewayProxyEvent } from 'aws-lambda';
+import { unique } from './validation';
 
 export const createModel = (
     apiConfig: API,
@@ -69,10 +70,12 @@ export const validatePkOnPath = (
     }
 };
 
-export const validateRequiredParameters = (
+export const validateRequiredParameters = async (
     event: APIGatewayProxyEvent,
-    schema: SchemaDefinition,
-): ErrorEntry[] => {
+    apiConfig: API,
+    apiEntityName: string,
+): Promise<ErrorEntry[]> => {
+    const schema = apiConfig[apiEntityName].schema;
     const body = event.body ? JSON.parse(event.body) : null;
     const errors: ErrorEntry[] = [];
 
@@ -81,6 +84,8 @@ export const validateRequiredParameters = (
             const prop = JSON.parse(JSON.stringify(schema[propertyName]));
 
             if (prop.required) {
+                const apiEntity = apiConfig[apiEntityName];
+
                 if (
                     typeof body !== 'object' ||
                     !body ||
@@ -90,8 +95,42 @@ export const validateRequiredParameters = (
                         message: `${propertyName} is required and was not provided in body`,
                         field: propertyName,
                     });
+                } else if (
+                    apiEntity.validations &&
+                    propertyName in apiEntity.validations
+                ) {
+                    let vals: ValidationType[] = [];
+
+                    if (Array.isArray(apiEntity.validations[propertyName])) {
+                        vals = apiEntity.validations[
+                            propertyName
+                        ] as ValidationType[];
+                    } else {
+                        vals.push(
+                            apiEntity.validations[
+                                propertyName
+                            ] as ValidationType,
+                        );
+                    }
+
+                    for (const val of vals) {
+                        if (val === ValidationType.Unique) {
+                            if (
+                                !(await unique(
+                                    propertyName,
+                                    body[propertyName],
+                                    apiConfig,
+                                    apiEntityName,
+                                ))
+                            ) {
+                                errors.push({
+                                    message: `${propertyName} is required and was not provided in body`,
+                                    field: propertyName,
+                                });
+                            }
+                        }
+                    }
                 }
-                // @todo it could use some customizable value validation
             }
         }
     }
