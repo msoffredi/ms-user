@@ -1,6 +1,9 @@
 import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
-import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
+import {
+    constructAuthenticatedAPIGwEvent,
+    testUserEmail,
+} from '../utils/helpers';
 import {
     Types,
     publisher,
@@ -80,4 +83,45 @@ it('throws a 422 error if the id provided to delete a user is not found', async 
     );
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(422);
+});
+
+it('Deletes a user when called with a user with proper permissions', async () => {
+    await addUser();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        {
+            method: 'DELETE',
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
+        },
+        testUserEmail,
+        [['users-api-users', 'delete']],
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(200);
+
+    const user2 = await User.get(testUser.id);
+    expect(user2.deletedAt).toBeDefined();
+});
+
+it('throws a 401 error if the authenticated user does not have the right permission', async () => {
+    await addUser();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        {
+            method: 'DELETE',
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
+        },
+        testUserEmail,
+        [['wrong-module', 'wrong-operation']],
+    );
+    const delResult = await handler(deleteEvent);
+    expect(delResult.statusCode).toEqual(401);
 });

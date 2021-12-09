@@ -83,13 +83,13 @@ export const api: API = {
     },
 };
 
-export const handler = async (
+export const handler2 = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     return APIHandler(api, event);
 };
 
-export const handler2 = async (
+export const handler = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     console.log('Received event:', event);
