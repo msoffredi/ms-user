@@ -1,6 +1,9 @@
 import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
-import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
+import {
+    constructAuthenticatedAPIGwEvent,
+    testUserEmail,
+} from '../utils/helpers';
 
 const testUser = {
     id: 'user123',
@@ -113,4 +116,32 @@ it('should paginate if number of users to return exceeds the response limit', as
     const result2 = await handler(getRestEvent);
     expect(result2.statusCode).toEqual(200);
     expect(JSON.parse(result.body).data.length).toEqual(totalUsers - scanLimit);
+});
+
+it('returns 401 if user does not have enough permissions', async () => {
+    await addUser();
+
+    const getAllEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        { method: 'GET', resource: '/v0/users' },
+        testUserEmail,
+        [['wrong-module', 'wrong=operation']],
+    );
+
+    const result = await handler(getAllEvent);
+    expect(result.statusCode).toEqual(401);
+});
+
+it('returns users if request done with proper permissions', async () => {
+    await addUser();
+
+    const getAllEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        { method: 'GET', resource: '/v0/users' },
+        testUserEmail,
+        [['users-api-users', 'read']],
+    );
+
+    const result = await handler(getAllEvent);
+    expect(result.statusCode).toEqual(200);
 });

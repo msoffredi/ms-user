@@ -16,8 +16,7 @@ import { getUsersHandler } from '../route-handlers/get-users';
 import { postUserHandler } from '../route-handlers/post-user';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { Config } from '../config';
-import { API, ValidationType } from './types';
-import { APIHandler } from './base';
+import { API, APIHandler, ValidationType } from '@jmsoffredi/ms-fast-api';
 
 if (process.env.AWS_SAM_LOCAL) {
     if (process.env.DYNAMODB_URI) {
@@ -47,6 +46,7 @@ export const api: API = {
             get: {
                 collection: true,
                 entity: true,
+                auth: Config.userService.users.readUsers,
             },
             delete: {
                 entity: {
@@ -57,6 +57,7 @@ export const api: API = {
                         },
                     ],
                 },
+                auth: Config.userService.users.deleteUser,
             },
             post: {
                 collection: {
@@ -67,6 +68,7 @@ export const api: API = {
                         },
                     ],
                 },
+                auth: Config.userService.users.createUser,
             },
         },
         timestamps: true,
@@ -74,12 +76,14 @@ export const api: API = {
         path: '/v0/users',
         softDelete: true,
         eventSource: EventSources.Users,
+        eventBusType: Config.events.eventBusType,
     },
     healthcheck: {
         schema: {},
         api: {},
         path: '/healthcheck',
         healthcheck: true,
+        eventBusType: Config.events.eventBusType,
     },
 };
 
@@ -103,9 +107,12 @@ export const handler = async (
             case '/v0/users/{id}':
                 switch (event.httpMethod) {
                     case 'GET':
-                        body = await routeAuthorizer(event, getOneUserHandler, [
-                            perm.users.readUsers,
-                        ]);
+                        body = await routeAuthorizer(
+                            event,
+                            getOneUserHandler,
+                            [perm.users.readUsers],
+                            true,
+                        );
                         break;
                     case 'DELETE':
                         body = await routeAuthorizer(event, delUserHandler, [

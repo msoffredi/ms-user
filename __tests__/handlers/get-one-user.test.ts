@@ -1,6 +1,9 @@
 import { handler } from '../../src/handlers/user-api';
 import { User, UserDoc } from '../../src/models/user';
-import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
+import {
+    constructAuthenticatedAPIGwEvent,
+    testUserEmail,
+} from '../utils/helpers';
 
 const testUser = {
     id: 'user123',
@@ -80,4 +83,63 @@ it('throws an error if we do not provide a user id on get', async () => {
     );
     const delResult = await handler(deleteEvent);
     expect(delResult.statusCode).toEqual(400);
+});
+
+it('throws a 401 error if the authenticated user does not have the right permission', async () => {
+    await addUser();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
+        },
+        'test2@test.com',
+        [['wrong-module', 'wrong-operation']],
+        'another-user',
+    );
+    const result = await handler(deleteEvent);
+    expect(result.statusCode).toEqual(401);
+});
+
+it('gets a user if the authenticated user have the right permission', async () => {
+    await addUser();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
+        },
+        testUserEmail,
+        [['users-api-users', 'read']],
+    );
+    const result = await handler(deleteEvent);
+    expect(result.statusCode).toEqual(200);
+});
+
+it('gets a user if getting their own user', async () => {
+    await addUser();
+    const user = await User.get(testUser.id);
+    expect(user).toBeDefined();
+
+    const deleteEvent = constructAuthenticatedAPIGwEvent(
+        {},
+        {
+            method: 'GET',
+            resource: '/v0/users/{id}',
+            pathParameters: { id: testUser.id },
+        },
+        testUser.email,
+        [],
+        testUser.id,
+    );
+    const result = await handler(deleteEvent);
+    expect(result.statusCode).toEqual(200);
 });

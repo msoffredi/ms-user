@@ -1,5 +1,8 @@
 import { handler } from '../../src/handlers/user-api';
-import { constructAuthenticatedAPIGwEvent } from '../utils/helpers';
+import {
+    constructAuthenticatedAPIGwEvent,
+    testUserEmail,
+} from '../utils/helpers';
 import {
     Types,
     publisher,
@@ -64,4 +67,43 @@ it('throws an error if calling POST without proper data', async () => {
 
     const postResult = await handler(event);
     expect(postResult.statusCode).toEqual(400);
+});
+
+it('gets a 401 id requesting user does not have enough permissions', async () => {
+    const payload = {
+        email: 'newuser@test.com',
+        id: 'user123',
+    };
+
+    const postRoleEvent = constructAuthenticatedAPIGwEvent(
+        payload,
+        {
+            method: 'POST',
+            resource: '/v0/users',
+        },
+        testUserEmail,
+        [['wrong-module', 'wrong-operation']],
+    );
+    const result = await handler(postRoleEvent);
+    expect(result.statusCode).toEqual(401);
+});
+
+it('adds user if request done with enough permissions', async () => {
+    const payload = {
+        email: 'newuser@test.com',
+        id: 'user123',
+    };
+
+    const postRoleEvent = constructAuthenticatedAPIGwEvent(
+        payload,
+        {
+            method: 'POST',
+            resource: '/v0/users',
+        },
+        testUserEmail,
+        [['users-api-users', 'create']],
+    );
+    const result = await handler(postRoleEvent);
+    expect(result.statusCode).toEqual(200);
+    expect(JSON.parse(result.body).id).toEqual(payload.id);
 });

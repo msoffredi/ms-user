@@ -103,6 +103,12 @@ You can execute project tests by running:
 $ npm run test
 ```
 
+By default `jest` is configured to run tests silently (hiding `console.log` and `console.error`). If you want to enable `console` output add the environment variable `DEBUG` with any value before runnning the tests. In Mac you can do:
+
+```bash
+$ DEBUG=1 npm run test
+```
+
 If you want to run specific tests, you can use the usual Jest filter parameter. For example:
 
 ```bash
