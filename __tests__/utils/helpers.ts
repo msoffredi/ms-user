@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 
 export const testUserEmail = 'test@test.com';
+export const testUserId = 'user123';
 export const readUsersPermissionId = 'authorization-api-read-users';
 
 export function constructAPIGwEvent(
@@ -30,11 +31,13 @@ export const constructAuthenticatedAPIGwEvent = (
     options: Record<string, unknown>,
     userEmail = testUserEmail,
     userPermissions = [['*', '*']],
+    userId = testUserId,
 ): APIGatewayProxyEvent => {
     const token = jwt.sign(
         {
             email: userEmail,
             userPermissions: JSON.stringify(userPermissions),
+            'custom:userId': userId,
         },
         'test',
     );

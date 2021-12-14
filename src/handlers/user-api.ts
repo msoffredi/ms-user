@@ -5,6 +5,8 @@ import {
     BadMethodError,
     BadRequestError,
     CustomError,
+    events,
+    EventSources,
     ResponseBody,
     routeAuthorizer,
 } from '@jmsoffredi/ms-common';
@@ -14,6 +16,7 @@ import { getUsersHandler } from '../route-handlers/get-users';
 import { postUserHandler } from '../route-handlers/post-user';
 import { healthcheckHandler } from '../route-handlers/healthcheck';
 import { Config } from '../config';
+import { API, APIHandler, ValidationType } from '@jmsoffredi/ms-fast-api';
 
 if (process.env.AWS_SAM_LOCAL) {
     if (process.env.DYNAMODB_URI) {
@@ -24,7 +27,74 @@ if (process.env.AWS_SAM_LOCAL) {
     }
 }
 
+export const api: API = {
+    users: {
+        schema: {
+            id: {
+                type: String,
+                hashKey: true,
+            },
+            email: {
+                type: String,
+                required: true,
+            },
+        },
+        validations: {
+            email: ValidationType.Unique,
+        },
+        api: {
+            get: {
+                collection: true,
+                entity: true,
+                auth: Config.userService.users.readUsers,
+                authSelf: true,
+            },
+            delete: {
+                entity: {
+                    events: [
+                        {
+                            type: events.UserDeleted.type,
+                            dataProperties: ['id', 'email'],
+                        },
+                    ],
+                },
+                auth: Config.userService.users.deleteUser,
+            },
+            post: {
+                collection: {
+                    events: [
+                        {
+                            type: events.UserCreated.type,
+                            dataProperties: ['id', 'email'],
+                        },
+                    ],
+                },
+                auth: Config.userService.users.createUser,
+            },
+        },
+        timestamps: true,
+        dbName: 'ms-user',
+        path: '/v0/users',
+        softDelete: true,
+        eventSource: EventSources.Users,
+        eventBusType: Config.events.eventBusType,
+    },
+    healthcheck: {
+        schema: {},
+        api: {},
+        path: '/healthcheck',
+        healthcheck: true,
+        eventBusType: Config.events.eventBusType,
+    },
+};
+
 export const handler = async (
+    event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> => {
+    return APIHandler(api, event);
+};
+
+export const handler2 = async (
     event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
     console.log('Received event:', event);
@@ -38,9 +108,12 @@ export const handler = async (
             case '/v0/users/{id}':
                 switch (event.httpMethod) {
                     case 'GET':
-                        body = await routeAuthorizer(event, getOneUserHandler, [
-                            perm.users.readUsers,
-                        ]);
+                        body = await routeAuthorizer(
+                            event,
+                            getOneUserHandler,
+                            [perm.users.readUsers],
+                            true,
+                        );
                         break;
                     case 'DELETE':
                         body = await routeAuthorizer(event, delUserHandler, [
